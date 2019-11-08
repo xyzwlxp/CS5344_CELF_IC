@@ -13,11 +13,17 @@ if len(sys.argv) > 1:
 else:
     path = 'data/twitter_combined.txt'
 
-
 if len(sys.argv) > 2:
+    path_graph = sys.argv[1]
+else:
+    path_graph = 'data/twitter_graph.txt'
+
+
+if len(sys.argv) > 3:
     out_path = sys.argv[2]
 else:
     out_path = 'outFile'
+    
 
 out_path_new = out_path
 count = 0
@@ -32,16 +38,15 @@ rddProcessor = RDDProcessor(sc,path)
 rdd_mapping = rddProcessor.getRddMapping()
 out_frequency,in_frequency  = rddProcessor.computeFrequency()
 
+# start_node = sc.parallelize([in_frequency.max(lambda l:l[1])[0]]).map(lambda l: (l, 1))
 start_node = [in_frequency.max(lambda l:l[1])[0]]
 
-jaccardProcessor = JaccardProcessor(sc, path)
+jaccardProcessor = JaccardProcessor(sc, path_graph)
 
 jaccard_mapping = jaccardProcessor.getJaccardMapping()
 
-## Lookup the key
-rdd_mapping_sorted = rdd_mapping.sortByKey()
 
-node_result = do_independent_cascade(rdd_mapping_sorted, start_node)
+node_result = do_independent_cascade(jaccard_mapping, start_node)
 
 #rdd2 = rdd_mapping.sortByKey()
 print(start_node)
